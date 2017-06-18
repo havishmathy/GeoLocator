@@ -30,15 +30,43 @@
 		id: 'mapbox.streets'
 	}).addTo(mymap);
 	location_activity = JSON.parse(sessionStorage.location_activity);
+	var i = sessionStorage.length;
+	while(i--) {
+  		var key = sessionStorage.key(i);
+  		    	sessionStorage.removeItem(key);
+  	
+	}
+	console.log("Total: "+Object.keys(location_activity).length.toString());
+	var i = 0;
 	for (var key in location_activity){
+		console.log(i);
+		i++;
 		lat_lon = key.split(",");
 		lat = parseFloat(lat_lon[0]);
 		lon = parseFloat(lat_lon[1]);
-		tag = location_activity[key][0];
+		tag = "";
+		var request = new XMLHttpRequest();
+		var method = 'GET';
+		var url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng='
+                    + lat.toString() + ',' + lon.toString() + '&sensor=true';
+        var async = false;
+        request.open(method, url, async);
+        request.onreadystatechange = function() {
+                if (request.readyState == 4 && request.status == 200) {
+                    var data = JSON.parse(request.responseText);
+                    var address = data.results[0];
+                    tag += address.formatted_address.toString();
+                   
+                }
+            };
+        console.log("sending request")
+        request.send();
+        tag += "<br> STATUS:" + location_activity[key][0];
+        
 		L.marker([lat, lon]).addTo(mymap)
 			.bindPopup(tag).openPopup();
 	}
-
+	s
 
 	
 
@@ -53,6 +81,7 @@
 	}
 
 	mymap.on('click', onMapClick);
+	
 
 </script>
 
